@@ -1,0 +1,80 @@
+services:
+  redis:
+    image: redis:7
+    ports:
+      - "6380:6379"   # host 6380 to avoid conflict with existing redis on 6379
+
+  rq-dashboard:
+    image: parroty/rq-dashboard:latest
+    environment:
+      - RQ_DASHBOARD_REDIS_URL=redis://redis:6379/0
+    ports:
+      - "9181:9181"
+    depends_on:
+      - redis
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11435:11434" # host 11435 to avoid conflict with existing ollama on 11434
+    volumes:
+      - ollama:/root/.ollama
+
+  # One-shot init container: pulls the planner model into the shared ollama volume.
+  # This enables a single command: `docker compose up --build`
+  ollama-init:
+    image: ollama/ollama:latest
+    depends_on:
+      - ollama
+    volumes:
+      - ollama:/root/.ollama
+    entrypoint: ["/bin/sh", "-lc"]
+    command: >
+      "until ollama list >/dev/null 2>&1; do echo 'waiting for ollama...'; sleep 2; done;
+       ollama pull ${LLM_MODEL:-phi4-mini:3.8b}"
+    restart: "no"
+
+  api:
+    build: .
+    env_file:
+      - .env
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - OLLAMA_URL=http://ollama:11434
+      - ASSETS_BASE_DIR=/data/assets
+      - HF_HOME=/data/hf
+    volumes:
+      - ./assets:/data/assets
+      - hf_cache:/data/hf
+    ports:
+      - "8000:8000"
+    depends_on:
+      redis:
+        condition: service_started
+      ollama-init:
+        condition: service_completed_successfully
+    gpus: all
+
+  worker:
+    build: .
+    command: ["python", "-m", "rq", "worker", "recipe-assets"]
+    env_file:
+      - .env
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - OLLAMA_URL=http://ollama:11434
+      - ASSETS_BASE_DIR=/data/assets
+      - HF_HOME=/data/hf
+    volumes:
+      - ./assets:/data/assets
+      - hf_cache:/data/hf
+    depends_on:
+      redis:
+        condition: service_started
+      ollama-init:
+        condition: service_completed_successfully
+    gpus: all
+
+volumes:
+  hf_cache:
+  ollama:

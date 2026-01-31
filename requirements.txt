@@ -1,0 +1,22 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+python-dotenv==1.0.1
+
+redis==5.2.1
+rq==2.1.0
+requests==2.32.3
+
+# Generative media
+torch>=2.2.0
+torchvision>=0.17.0
+diffusers==0.32.2
+transformers>=4.44.0
+accelerate>=0.33.0
+safetensors>=0.4.3
+
+# Imaging/video utils
+pillow>=10.3.0
+numpy>=1.26.4
+imageio>=2.34.1
+opencv-python>=4.10.0.84

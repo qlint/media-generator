@@ -1,0 +1,15 @@
+{
+  "id": 1,
+  "ingredients": [
+    "All purpose flour",
+    "cup of sugar",
+    "scoop of butter",
+    "2 eggs",
+    "pinch of cinnamon"
+  ],
+  "recipe_steps": [
+    "Mix the flour, sugar, eggs and cinnamon.",
+    "Smear some butter onto a hot pan then pour the mixed paste onto the pan.",
+    "Cook until golden, then remove from heat and let it cool for 20 minutes."
+  ]
+}
