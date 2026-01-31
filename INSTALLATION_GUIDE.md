@@ -30,7 +30,7 @@ docker compose up --build
 
 This starts:
 - FastAPI on `http://localhost:8000`
-- RQ Dashboard on `http://localhost:9181`
+- RQ Dashboard on `http://localhost:9181` (built locally; no Docker Hub image pull)
 - Redis queue (host port **6380** → container 6379)
 - Ollama LLM server (host port **11435** → container 11434)
 

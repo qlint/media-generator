@@ -1,0 +1,7 @@
+FROM python:3.11-slim
+
+RUN pip install --no-cache-dir rq-dashboard redis
+
+EXPOSE 9181
+
+CMD ["rq-dashboard", "--redis-url", "redis://redis:6379/0", "--host", "0.0.0.0", "--port", "9181"]

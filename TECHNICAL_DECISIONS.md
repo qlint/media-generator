@@ -8,6 +8,13 @@
 - RQ is simple, reliable, and lightweight for Python.
 - RQ Dashboard provides a browser UI showing queues, jobs, runtimes, failures, and workers.
 
+## 1b) RQ Dashboard container image
+
+**Decision:** Build the RQ Dashboard container locally (via `Dockerfile.rq-dashboard`).  
+**Why:**  
+- Some third-party Docker Hub images may be missing/renamed or require authentication.  
+- Building from the upstream Python package (`rq-dashboard`) is deterministic and works with a single `docker compose up --build`.
+
 ## 2) Single-command deployment on VPS
 
 **Decision:** Add an `ollama-init` one-shot container in Docker Compose that pulls the planner model automatically.  

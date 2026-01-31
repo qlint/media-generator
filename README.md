@@ -12,6 +12,6 @@ docker compose up --build
 
 Quick links:
 - API docs: http://localhost:8000/docs
-- RQ Dashboard: http://localhost:9181
+- RQ Dashboard: http://localhost:9181 (built locally)
 - Redis (host-mapped): localhost:6380
 - Ollama (host-mapped): localhost:11435

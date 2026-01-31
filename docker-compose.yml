@@ -5,9 +5,9 @@ services:
       - "6380:6379"   # host 6380 to avoid conflict with existing redis on 6379
 
   rq-dashboard:
-    image: parroty/rq-dashboard:latest
-    environment:
-      - RQ_DASHBOARD_REDIS_URL=redis://redis:6379/0
+    build:
+      context: .
+      dockerfile: Dockerfile.rq-dashboard
     ports:
       - "9181:9181"
     depends_on:
