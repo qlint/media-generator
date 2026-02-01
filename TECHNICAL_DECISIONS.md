@@ -20,7 +20,7 @@
 **Decision:** Add an `ollama-init` one-shot container in Docker Compose that pulls the planner model automatically.  
 **Why:**  
 - VPS deployments benefit from **one command** (`docker compose up --build`) with no manual post-steps.
-- The init container waits until `ollama` is ready, pulls `LLM_MODEL`, and exits successfully.
+- The init container waits until Ollama's **HTTP API** is reachable (`/api/tags`), pulls `LLM_MODEL` via `/api/pull`, and exits successfully.
 - Models are stored in the persistent `ollama` volume so subsequent restarts do not re-download.
 
 ## 3) Port conflict avoidance for shared VPS
@@ -31,7 +31,7 @@
 - This project maps:
   - Redis container port 6379 → host **6380**
   - Ollama container port 11434 → host **11435**
-- Internal service-to-service traffic uses Docker networking (`redis:6379`, `ollama:11434`), so application code does not change.
+- Internal service-to-service traffic uses Docker networking (`redis:6379`, `ollama:11434`). The `ollama` container is explicitly set to `OLLAMA_HOST=0.0.0.0:11434` so it listens on all interfaces inside the container, ensuring other containers can reach it.
 
 ## 4) LLM choice: phi4-mini in Ollama
 

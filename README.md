@@ -20,3 +20,7 @@ Quick links:
 Health:
 - http://localhost:8000/health
 - http://localhost:8000/health-check
+
+
+Notes:
+- `ollama-init` automatically pulls the model defined by `LLM_MODEL` (default `phi4-mini:3.8b`) before the API/worker start.

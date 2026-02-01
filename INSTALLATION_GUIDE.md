@@ -34,8 +34,8 @@ This starts:
 - Redis queue (host port **6380** → container 6379)
 - Ollama LLM server (host port **11435** → container 11434)
 
-### Model pulling happens automatically
-On first boot, a one-shot container `ollama-init` waits for Ollama to be ready, then pulls the planner model defined by `LLM_MODEL` in `.env` (default: `phi4-mini:3.8b`).  
+### Model pulling happens automatically (via Ollama HTTP API)
+On first boot, a one-shot container `ollama-init` waits for Ollama's **HTTP API** (`GET /api/tags`) to be ready, then pulls the planner model defined by `LLM_MODEL` in `.env` (default: `phi4-mini:3.8b`) using `POST /api/pull`. It also checks whether the model is already present to avoid re-downloading.  
 No extra commands are required.
 
 ---
