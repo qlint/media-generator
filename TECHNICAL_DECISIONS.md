@@ -125,3 +125,19 @@ All prompts enforce:
 - Some prebuilt ML base images ship with NumPy 2.x, which can break binary extensions compiled against NumPy 1.x.
 - Diffusers 0.32.x expects `FLAX_WEIGHTS_NAME` from Transformers; newer Transformers releases removed it.
 - Pinning avoids runtime import/ABI issues on fresh VPS deployments.
+
+
+## Resumability and idempotent generation
+**Decision:** Checkpoint generation with a per-recipe `manifest.json` and deterministic filenames.
+**Why:**
+- If a long-running job fails mid-way, re-running should not waste time regenerating completed assets.
+- Deterministic output paths allow simple file-existence checks to skip completed work.
+- Manifest provides observability (what was generated, what failed) and powers an API endpoint to list asset URLs.
+
+
+## Serving assets over HTTP
+**Decision:** Mount the assets directory using FastAPI `StaticFiles` at `/assets`.
+**Why:**
+- Simple, zero additional infrastructure.
+- Works well behind a reverse proxy (nginx/caddy) on a VPS.
+- Keeps asset URLs stable and directly derivable from `{id}/{index}`.

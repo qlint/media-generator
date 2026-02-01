@@ -188,3 +188,11 @@ This project pins `numpy==1.26.4` and `transformers==4.44.2` to avoid known comp
 ```bash
 docker compose build --no-cache
 ```
+
+
+## Resumability (resume failed jobs)
+This service is *checkpointed*.
+- Outputs are written deterministically under `assets/<id>/...`.
+- A `manifest.json` is updated throughout generation.
+
+If a job fails, POST the same payload again with the same `id`. The worker will skip files that already exist and continue.

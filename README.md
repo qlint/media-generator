@@ -40,3 +40,14 @@ docker compose logs -f ollama-init
 
 Notes:
 - Requirements pin `numpy==1.26.4` and `transformers==4.44.2` for runtime compatibility.
+
+
+Resumability:
+- If a job fails, POST again with the same `id`. Existing assets are skipped and generation resumes.
+
+
+Access assets:
+- http://localhost:8000/assets/<id>/ingredients/0.png
+- http://localhost:8000/assets/<id>/steps/0.png
+- http://localhost:8000/assets/<id>/steps/1.mp4
+- Manifest + URLs: http://localhost:8000/v1/recipes/<id>/assets

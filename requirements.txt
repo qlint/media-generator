@@ -13,6 +13,7 @@ torchvision>=0.17.0
 diffusers==0.32.2
 # Pin transformers to a version compatible with diffusers 0.32.x (FLAX_WEIGHTS_NAME present)
 transformers==4.44.2
+sentencepiece>=0.1.99
 accelerate>=0.33.0
 safetensors>=0.4.3
 
@@ -23,4 +24,3 @@ numpy==1.26.4
 pillow>=10.3.0
 imageio>=2.34.1
 opencv-python>=4.10.0.84
-sentencepiece>=0.1.99
