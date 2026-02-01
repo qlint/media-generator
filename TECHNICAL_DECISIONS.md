@@ -117,3 +117,11 @@ All prompts enforce:
 **Why:**
 - Docker Compose performs its own variable expansion on `$VAR`/`${VAR}`.
 - Using `$$VAR` ensures the shell in the container receives `$VAR` as intended.
+
+
+## Dependency pinning for stability
+**Decision:** Pin `numpy==1.26.4` and `transformers==4.44.2`.
+**Why:**
+- Some prebuilt ML base images ship with NumPy 2.x, which can break binary extensions compiled against NumPy 1.x.
+- Diffusers 0.32.x expects `FLAX_WEIGHTS_NAME` from Transformers; newer Transformers releases removed it.
+- Pinning avoids runtime import/ABI issues on fresh VPS deployments.

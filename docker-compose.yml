@@ -78,7 +78,7 @@ services:
 
   worker:
     build: .
-    command: ["python", "-m", "rq", "worker", "recipe-assets"]
+    command: ["rq", "worker", "recipe-assets"]
     env_file:
       - .env
     environment:

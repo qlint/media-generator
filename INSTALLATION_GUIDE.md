@@ -180,3 +180,11 @@ During first startup, watch model download progress with:
 ```bash
 docker compose logs -f ollama-init
 ```
+
+
+## Dependency note (NumPy/Transformers)
+This project pins `numpy==1.26.4` and `transformers==4.44.2` to avoid known compatibility issues with some prebuilt ML images and Diffusers. If you previously built an older image, rebuild with:
+
+```bash
+docker compose build --no-cache
+```

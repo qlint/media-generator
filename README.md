@@ -36,3 +36,7 @@ Watch Ollama model pull progress:
 ```bash
 docker compose logs -f ollama-init
 ```
+
+
+Notes:
+- Requirements pin `numpy==1.26.4` and `transformers==4.44.2` for runtime compatibility.
