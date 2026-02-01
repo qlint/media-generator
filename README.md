@@ -15,3 +15,8 @@ Quick links:
 - RQ Dashboard: http://localhost:9181 (built locally)
 - Redis (host-mapped): localhost:6380
 - Ollama (host-mapped): localhost:11435
+
+
+Health:
+- http://localhost:8000/health
+- http://localhost:8000/health-check

@@ -147,3 +147,17 @@ docker compose -f docker-compose.yml -f docker-compose.cpu.yml up --build
 ```bash
 docker compose down
 ```
+
+
+### RQ Dashboard binding note
+The dashboard is configured using environment variables inside its container (`RQ_DASHBOARD_BIND=0.0.0.0`, `RQ_DASHBOARD_PORT=9181`, `RQ_DASHBOARD_REDIS_URL=redis://redis:6379/0`) to ensure it is reachable from outside the container.
+
+
+## Health checks
+- Liveness: `GET /health`
+- Dependency check (Redis + Ollama): `GET /health-check`
+
+Example:
+```bash
+curl http://localhost:8000/health-check
+```

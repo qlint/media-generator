@@ -1,7 +1,13 @@
 FROM python:3.11-slim
 
-RUN pip install --no-cache-dir rq-dashboard redis
+# Pin a modern rq-dashboard version to ensure consistent CLI/config behavior
+RUN pip install --no-cache-dir rq-dashboard==0.8.6 redis
+
+# Configure via environment variables (most stable across versions)
+ENV RQ_DASHBOARD_REDIS_URL=redis://redis:6379/0 \
+    RQ_DASHBOARD_BIND=0.0.0.0 \
+    RQ_DASHBOARD_PORT=9181
 
 EXPOSE 9181
 
-CMD ["rq-dashboard", "--redis-url", "redis://redis:6379/0", "--host", "0.0.0.0", "--port", "9181"]
+CMD ["rq-dashboard"]

@@ -10,7 +10,7 @@
 
 ## 1b) RQ Dashboard container image
 
-**Decision:** Build the RQ Dashboard container locally (via `Dockerfile.rq-dashboard`).  
+**Decision:** Build the RQ Dashboard container locally (via `Dockerfile.rq-dashboard`) and configure it via `RQ_DASHBOARD_*` environment variables.  
 **Why:**  
 - Some third-party Docker Hub images may be missing/renamed or require authentication.  
 - Building from the upstream Python package (`rq-dashboard`) is deterministic and works with a single `docker compose up --build`.
