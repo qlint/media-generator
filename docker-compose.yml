@@ -24,7 +24,7 @@ services:
       - ollama:/root/.ollama
 
   # One-shot init container: waits for Ollama's HTTP API, then pulls the planner model via /api/pull.
-  # This enables a single command: `docker compose up --build`
+  # Prints streaming progress so it doesn't look "stuck".
   ollama-init:
     image: curlimages/curl:8.5.0
     depends_on:
@@ -32,14 +32,27 @@ services:
     entrypoint: ["/bin/sh", "-lc"]
     command: >
       "MODEL='${LLM_MODEL:-phi4-mini:3.8b}';
-       echo "ollama-init: waiting for ollama HTTP API...";
-       until curl -sSf http://ollama:11434/api/tags >/tmp/tags.json; do echo 'waiting for ollama...'; sleep 2; done;
-       if grep -q "\"name\":\"$MODEL\"" /tmp/tags.json; then
-         echo "ollama-init: model already present: $MODEL";
+       echo 'ollama-init: waiting for ollama HTTP API...';
+       until curl -sSf http://ollama:11434/api/tags >/tmp/tags.json >/dev/null; do echo 'waiting for ollama...'; sleep 2; done;
+       if grep -q \"\\\"name\\\":\\\"$$MODEL\\\"\" /tmp/tags.json; then
+         echo \"ollama-init: model already present: $$MODEL\";
        else
-         echo "ollama-init: pulling model: $MODEL";
-         curl -sSf http://ollama:11434/api/pull -H 'Content-Type: application/json' -d "{\"model\":\"$MODEL\",\"stream\":false}" >/dev/null;
-         echo "ollama-init: pull complete: $MODEL";
+         echo \"ollama-init: pulling model with progress: $$MODEL\";
+         curl -sS -N http://ollama:11434/api/pull -H 'Content-Type: application/json' -d \"{\\\"model\\\":\\\"$$MODEL\\\"}\" |
+           while IFS= read -r line; do
+             status=$$(echo \"$$line\" | sed -n 's/.*\"status\":\"\\([^\"]*\\)\".*/\\1/p');
+             completed=$$(echo \"$$line\" | sed -n 's/.*\"completed\":\\([0-9][0-9]*\\).*/\\1/p');
+             total=$$(echo \"$$line\" | sed -n 's/.*\"total\":\\([0-9][0-9]*\\).*/\\1/p');
+             if [ -n \"$$status\" ] && [ -n \"$$completed\" ] && [ -n \"$$total\" ] && [ \"$$total\" -gt 0 ] 2>/dev/null; then
+               pct=$$(( $$completed * 100 / $$total ));
+               echo \"ollama-init: $$status ($$pct%)\";
+             elif [ -n \"$$status\" ]; then
+               echo \"ollama-init: $$status\";
+             else
+               echo \"ollama-init: $$line\";
+             fi
+           done;
+         echo \"ollama-init: pull complete: $$MODEL\";
        fi"
     restart: "no"
 
@@ -62,7 +75,6 @@ services:
         condition: service_started
       ollama-init:
         condition: service_completed_successfully
-    gpus: all
 
   worker:
     build: .
@@ -82,7 +94,6 @@ services:
         condition: service_started
       ollama-init:
         condition: service_completed_successfully
-    gpus: all
 
 volumes:
   hf_cache:

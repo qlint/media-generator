@@ -2,9 +2,7 @@ services:
   api:
     environment:
       - DEVICE=cpu
-    gpus: null
 
   worker:
     environment:
       - DEVICE=cpu
-    gpus: null

@@ -1,0 +1,10 @@
+services:
+  api:
+    environment:
+      - DEVICE=cuda
+    gpus: all
+
+  worker:
+    environment:
+      - DEVICE=cuda
+    gpus: all

@@ -102,3 +102,18 @@ All prompts enforce:
 - Reproducibility and easier deployment.
 - Separates API, worker, queue, dashboard, and LLM runtime.
 - Model caches persisted using Docker volumes.
+
+
+## GPU optionality
+**Decision:** Keep GPU usage optional via `docker-compose.gpu.yml`.
+**Why:**
+- Many VPS environments have no GPU; forcing `gpus: all` causes Docker to error.
+- The default stack runs on CPU without special drivers.
+- GPU can be enabled with a single command using an override compose file.
+
+
+## Compose variable expansion in init scripts
+**Decision:** Escape shell variables in `docker-compose.yml` init scripts using `$$`.
+**Why:**
+- Docker Compose performs its own variable expansion on `$VAR`/`${VAR}`.
+- Using `$$VAR` ensures the shell in the container receives `$VAR` as intended.

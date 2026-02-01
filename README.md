@@ -24,3 +24,15 @@ Health:
 
 Notes:
 - `ollama-init` automatically pulls the model defined by `LLM_MODEL` (default `phi4-mini:3.8b`) before the API/worker start.
+
+
+GPU (optional):
+```bash
+docker compose -f docker-compose.yml -f docker-compose.gpu.yml up --build
+```
+
+
+Watch Ollama model pull progress:
+```bash
+docker compose logs -f ollama-init
+```

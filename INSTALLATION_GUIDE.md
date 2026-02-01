@@ -34,7 +34,7 @@ This starts:
 - Redis queue (host port **6380** → container 6379)
 - Ollama LLM server (host port **11435** → container 11434)
 
-### Model pulling happens automatically (via Ollama HTTP API)
+### Model pulling happens automatically (via Ollama HTTP API, with progress logs)
 On first boot, a one-shot container `ollama-init` waits for Ollama's **HTTP API** (`GET /api/tags`) to be ready, then pulls the planner model defined by `LLM_MODEL` in `.env` (default: `phi4-mini:3.8b`) using `POST /api/pull`. It also checks whether the model is already present to avoid re-downloading.  
 No extra commands are required.
 
@@ -134,8 +134,9 @@ This project maps:
 
 If those are still in use on your VPS, change them in `docker-compose.yml`.
 
-### CPU-only run
-Set `DEVICE=cpu` in `.env` and run:
+### CPU-only run (default)
+By default, `.env` sets `DEVICE=cpu` and `docker compose up --build` will work on CPU.
+If you changed `DEVICE` and want to force CPU, run:
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.cpu.yml up --build
 ```
@@ -160,4 +161,22 @@ The dashboard is configured using environment variables inside its container (`R
 Example:
 ```bash
 curl http://localhost:8000/health-check
+```
+
+
+## GPU acceleration (recommended)
+If your VPS has an NVIDIA GPU and the NVIDIA Container Toolkit installed, run:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.gpu.yml up --build
+```
+
+This enables `gpus: all` for the API/worker and sets `DEVICE=cuda`.
+
+
+### Viewing model download progress
+During first startup, watch model download progress with:
+
+```bash
+docker compose logs -f ollama-init
 ```
