@@ -1,0 +1,76 @@
+[
+  {
+    "category": "breakfast",
+    "primary_archetypes": [
+      "eggs",
+      "grains",
+      "oats",
+      "yogurt",
+      "quick fruits"
+    ],
+    "typical_techniques": [
+      "high heat",
+      "frying",
+      "no-heat",
+      "mixing"
+    ]
+  },
+  {
+    "category": "brunch",
+    "primary_archetypes": [
+      "cured meats",
+      "eggs",
+      "baked goods",
+      "alcohol-based pairings"
+    ],
+    "typical_techniques": [
+      "baking",
+      "poaching",
+      "assembly"
+    ]
+  },
+  {
+    "category": "lunch",
+    "primary_archetypes": [
+      "greens",
+      "cold proteins",
+      "sliced bread",
+      "legumes"
+    ],
+    "typical_techniques": [
+      "mixing",
+      "assembly",
+      "light sautéing",
+      "light sauteing"
+    ]
+  },
+  {
+    "category": "dinner",
+    "primary_archetypes": [
+      "large proteins",
+      "roasts",
+      "starches",
+      "pasta",
+      "potatoes",
+      "root vegetables"
+    ],
+    "typical_techniques": [
+      "braising",
+      "roasting",
+      "searing"
+    ]
+  },
+  {
+    "category": "snack",
+    "primary_archetypes": [
+      "nuts",
+      "raw veggies",
+      "dips",
+      "dried fruits"
+    ],
+    "typical_techniques": [
+      "no-heat",
+      "minimal prep"
+    ]
+  }
+]

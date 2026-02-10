@@ -141,3 +141,14 @@ All prompts enforce:
 - Simple, zero additional infrastructure.
 - Works well behind a reverse proxy (nginx/caddy) on a VPS.
 - Keeps asset URLs stable and directly derivable from `{id}/{index}`.
+
+
+## Recipe categorizer queue and DB-first taxonomy
+- Added a separate RQ queue `recipe-categorizer` to isolate classification workloads from media generation.
+- Scheduler polls every 10 minutes and enqueues unprocessed recipes in batches (default 10).
+- Category definitions are loaded dynamically from `app.broad_categories` (no hard-coded IDs), allowing future extension without code changes.
+- Classification uses:
+  1. heuristic priors (time, thermal intensity, satiety, overlap rules),
+  2. ingredient archetype map, and
+  3. Ollama LLM finalization with strict allowed-category constraints.
+- Persistence is idempotent: relation rows for a recipe are replaced atomically and `processed_categories` is set to true.

@@ -51,3 +51,10 @@ Access assets:
 - http://localhost:8000/assets/<id>/steps/0.png
 - http://localhost:8000/assets/<id>/steps/1.mp4
 - Manifest + URLs: http://localhost:8000/v1/recipes/<id>/assets
+
+
+## New: Recipe Categorizer Queue
+- Queue name: `recipe-categorizer`
+- Scheduler service polls DB every 10 minutes and enqueues at least 10 unprocessed recipes (if available)
+- Worker classifies into dynamic broad categories from `app.broad_categories`
+- Saves relations into `app.recipe_broad_categories` and sets `app.recipes.processed_categories=true`

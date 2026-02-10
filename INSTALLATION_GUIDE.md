@@ -196,3 +196,26 @@ This service is *checkpointed*.
 - A `manifest.json` is updated throughout generation.
 
 If a job fails, POST the same payload again with the same `id`. The worker will skip files that already exist and continue.
+
+
+## Recipe categorizer feature (new queue)
+
+This stack now includes:
+- `category-scheduler`: checks DB every 10 minutes and enqueues recipes where `processed_categories` is NULL/FALSE.
+- `category-worker`: consumes queue `recipe-categorizer` and classifies recipes.
+
+### Required DB schema additions
+Ensure these exist in Postgres:
+- `app.recipes.processed_categories boolean`
+- `app.broad_categories(broad_category_id serial, broad_category varchar)`
+- `app.recipe_broad_categories(recipe_broad_category_id serial, recipe_id integer, broad_category_id integer)`
+
+### Environment
+Set either `DATABASE_URL` or (`DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`) in `.env`.
+
+### Manual enqueue endpoint
+```bash
+curl -X POST http://localhost:8000/v1/categorizer/recipes/enqueue \
+  -H "Content-Type: application/json" \
+  -d '{"recipe_id": 521}'
+```

@@ -95,6 +95,39 @@ services:
       ollama-init:
         condition: service_completed_successfully
 
+  category-worker:
+    build: .
+    command: ["rq", "worker", "recipe-categorizer"]
+    env_file:
+      - .env
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - OLLAMA_URL=http://ollama:11434
+      - HF_HOME=/data/hf
+    volumes:
+      - hf_cache:/data/hf
+    depends_on:
+      redis:
+        condition: service_started
+      ollama-init:
+        condition: service_completed_successfully
+
+  category-scheduler:
+    build: .
+    command: ["python", "-m", "app.categorizer.scheduler"]
+    env_file:
+      - .env
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - OLLAMA_URL=http://ollama:11434
+    depends_on:
+      redis:
+        condition: service_started
+      ollama-init:
+        condition: service_completed_successfully
+      category-worker:
+        condition: service_started
+
 volumes:
   hf_cache:
   ollama:

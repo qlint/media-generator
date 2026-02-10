@@ -6,12 +6,20 @@ import os
 import time
 import requests
 
-from app.models import RecipeIn, EnqueueResponse, JobStatus
-from app.queue import get_queue, get_redis
+from app.models import RecipeIn, EnqueueResponse, JobStatus, CategoryEnqueueIn, CategoryEnqueueResponse
+from app.queue import (
+    get_queue,
+    get_redis,
+    get_category_queue,
+    claim_category_recipe,
+    clear_category_claim,
+)
 from app.tasks import generate_assets_job
 from app.progress import load_manifest
+from app.categorizer.db import check_postgres
 
-app = FastAPI(title="Recipe Media Generator (T2V)", version="2.2")
+
+app = FastAPI(title="Recipe Media Generator (T2V + Categorizer)", version="3.0")
 
 
 def _check_redis() -> dict:
@@ -44,7 +52,6 @@ def _check_ollama() -> dict:
 # --- Static asset serving ---
 ASSETS_BASE_DIR = os.getenv("ASSETS_BASE_DIR", "/data/assets")
 os.makedirs(ASSETS_BASE_DIR, exist_ok=True)
-# This exposes e.g. /assets/100/ingredients/0.png
 app.mount("/assets", StaticFiles(directory=ASSETS_BASE_DIR), name="assets")
 
 
@@ -57,10 +64,12 @@ def health():
 def health_check():
     redis_status = _check_redis()
     ollama_status = _check_ollama()
-    overall_ok = bool(redis_status.get("ok")) and bool(ollama_status.get("ok"))
-    return {"ok": overall_ok, "services": {"redis": redis_status, "ollama": ollama_status}}
+    pg_status = check_postgres()
+    overall_ok = bool(redis_status.get("ok")) and bool(ollama_status.get("ok")) and bool(pg_status.get("ok"))
+    return {"ok": overall_ok, "services": {"redis": redis_status, "ollama": ollama_status, "postgres": pg_status}}
 
 
+# ----------------- Asset generation endpoints -----------------
 @app.post("/v1/recipes/assets", response_model=EnqueueResponse, status_code=202)
 def enqueue_assets(recipe: RecipeIn):
     # IMPORTANT: This endpoint is idempotent-ish by recipe id: posting the same id again
@@ -89,11 +98,10 @@ def job_status(job_id: str):
 
 @app.get("/v1/recipes/{recipe_id}/assets")
 def recipe_assets(recipe_id: int):
-    """Return the current manifest plus convenient web URLs for generated assets."""
     m = load_manifest(ASSETS_BASE_DIR, recipe_id)
     if not m:
         raise HTTPException(status_code=404, detail="manifest not found for recipe id")
-    # Build URLs based on manifest file entries
+
     def url_for(rel_path: str) -> str:
         rel_path = rel_path.lstrip("/")
         return f"/assets/{recipe_id}/{rel_path}"
@@ -117,3 +125,39 @@ def recipe_assets(recipe_id: int):
             out["urls"]["steps"][k] = [url_for(f) for f in files]
 
     return out
+
+
+# ----------------- Recipe categorizer endpoints -----------------
+@app.post("/v1/categorizer/recipes/enqueue", response_model=CategoryEnqueueResponse, status_code=202)
+def enqueue_recipe_for_categorization(payload: CategoryEnqueueIn):
+    rid = int(payload.recipe_id)
+    if not claim_category_recipe(rid):
+        return CategoryEnqueueResponse(
+            accepted=False,
+            message="already in-flight",
+            recipe_id=rid,
+            job_id=f"recipe-category-{rid}",
+            status_url=f"/v1/jobs/recipe-category-{rid}",
+        )
+
+    q = get_category_queue()
+    try:
+        job = q.enqueue(
+            "app.categorizer.tasks.process_recipe_category_job",
+            rid,
+            job_id=f"recipe-category-{rid}",
+            job_timeout=os.getenv("CATEGORY_JOB_TIMEOUT", "20m"),
+            result_ttl=int(os.getenv("CATEGORY_RESULT_TTL_S", "86400")),
+            failure_ttl=int(os.getenv("CATEGORY_FAILURE_TTL_S", "86400")),
+        )
+    except Exception as e:
+        clear_category_claim(rid)
+        raise HTTPException(status_code=409, detail=str(e))
+
+    return CategoryEnqueueResponse(
+        accepted=True,
+        message="queued",
+        recipe_id=rid,
+        job_id=job.id,
+        status_url=f"/v1/jobs/{job.id}",
+    )
